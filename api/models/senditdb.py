@@ -47,12 +47,12 @@ class DatabaseConnection:
     def signup(self, username, email, password):
         if not self.get_user(email):
             insert_user = "INSERT INTO users(username,email,password) VALUES('{}','{}','{}')".format(username, email,
-                                                                                                 password)
+                                                                                                     password)
             self.cursor.execute(insert_user)
             return "user added"
         return "user exist"
 
-    def login(self, username):
-        login_user = "SELECT * FROM users WHERE username = {}".format(username)
-        self.cursor.execute(login_user)
-        return self.cursor.fetchone()
+    def login(self, email):
+        if not self.get_user(email):
+            return
+        return "signup please"

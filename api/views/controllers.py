@@ -35,13 +35,8 @@ user_blueprint = Blueprint("user", __name__)
 def signup():
     data = request.get_json()
     username = data.get('username')
-    #password = generate_password_hash('password', method='sha256')
     password = data.get('password')
     email = data.get('email')
-
-    user_exists = db.get_user(email)
-    if user_exists:
-        return ({"message": "user already exists"}), 400
 
     signup_data = db.signup(username, password, email)
     return jsonify({"user": signup_data}), 201
@@ -61,11 +56,18 @@ def login():
     username = data.get('username')
     password = data.get('password')
 
-    for user in users_list:
-        if not user['username'] == username:
-            return jsonify({"message": "wrong username"})
-        if not check_password_hash(user['password'], 'password'):
-            return jsonify({"message": "wrong password"})
+    return jsonify({"message": "successfully logged in"}), 200
+
+
+
+
+
+
+    #for user in users_list:
+        #if not user['username'] == username:
+            #return jsonify({"message": "wrong username"})
+        #if not check_password_hash(user['password'], 'password'):
+            #return jsonify({"message": "wrong password"})
 
     #tk = jwt.encode({
         #'username': user['username'],
