@@ -1,5 +1,6 @@
 import psycopg2
-from werkzeug.security import generate_password_hash,check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+from api.models.models import Parcel, parcels
 
 
 class DatabaseConnection:
@@ -21,7 +22,8 @@ class DatabaseConnection:
                     parcel_location VARCHAR(20) NOT NULL,
                     parcel_destination VARCHAR(20) NOT NULL,
                     parcel_weight INTEGER NOT NULL, 
-                    parcel_description VARCHAR(20) NOT NULL
+                    parcel_description VARCHAR(20) NOT NULL,
+                    status VARCHAR(20) NOT NULL
                                                    
                 )
             """
@@ -59,3 +61,33 @@ class DatabaseConnection:
         if not self.get_user(email):
             return
         return "signup please"
+
+    def insert_new_parcel(self, parcel_location, parcel_destination, parcel_weight, parcel_description, status):
+
+        insert_parcel = "INSERT INTO parcel(parcel_location, parcel_destination, parcel_weight, parcel_description, " \
+                        "status ) VALUES('{}','{}','{}','{}','{}')".format(parcel_location, parcel_destination,
+                                                                           parcel_weight, parcel_description, status)
+        self.cursor.execute(insert_parcel)
+        return "parcel successfully created"
+
+    def get_all_parcels(self):
+        get_all_parcel = "SELECT * FROM parcel"
+        self.cursor.execute(get_all_parcel)
+        results = self.cursor.fetchall()
+        if not results:
+            return False
+        for result in results:
+            parcel = Parcel(result[0], result[1], result[2], result[3], result[4]).to_dict()
+            parcels.append(parcel)
+        return parcels
+
+    def get_one_parcel(self, parcel_id):
+        get_single_parcel = "SELECT * FROM parcel WHERE parcel_id = {}".format(parcel_id)
+        self.cursor.execute(get_single_parcel)
+        result = self.cursor.fetchone()
+        if not result:
+            return False
+        parcel = Parcel(result[0], result[1], result[2], result[3], result[4]).to_dict()
+        parcels.append(parcel)
+        return parcel
+
