@@ -46,8 +46,11 @@ class DatabaseConnection:
 
     def signup(self, username, email, password):
         if not self.get_user(email):
+
+            hash_pwd = generate_password_hash(password)
             insert_user = "INSERT INTO users(username,email,password) VALUES('{}','{}','{}')".format(username, email,
-                                                                                                     password)
+                                                                                                     hash_pwd)
+
             self.cursor.execute(insert_user)
             return "user added"
         return "user exist"
