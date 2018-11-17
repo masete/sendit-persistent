@@ -1,4 +1,5 @@
 import psycopg2
+from werkzeug.security import generate_password_hash,check_password_hash
 
 
 class DatabaseConnection:
@@ -8,7 +9,7 @@ class DatabaseConnection:
             CREATE TABLE IF NOT EXISTS users(
                     user_id SERIAL PRIMARY KEY,
                     username VARCHAR(50) NOT NULL,
-                    email VARCHAR(50) NOT NULL,
+                    email VARCHAR(100) NOT NULL,
                     password VARCHAR(200) NOT NULL
                     )
             
@@ -28,7 +29,7 @@ class DatabaseConnection:
 
         self.connection = psycopg2.connect(dbname='senditdb',
                                            user='postgres',
-                                           password='postgres',
+                                           password='qwerty',
                                            host='localhost',
                                            port='5432')
         self.connection.autocommit = True
@@ -36,3 +37,22 @@ class DatabaseConnection:
         print(self.cursor)
         for command in self.commands:
             self.cursor.execute(command)
+
+    def get_user(self, email):
+        self.cursor.execute("SELECT * FROM users WHERE email='{}'".format(email))
+        if self.cursor.fetchone():
+            return True
+        return False
+
+    def signup(self, username, email, password):
+        if not self.get_user(email):
+            insert_user = "INSERT INTO users(username,email,password) VALUES('{}','{}','{}')".format(username, email,
+                                                                                                 password)
+            self.cursor.execute(insert_user)
+            return "user added"
+        return "user exist"
+
+    def login(self, username):
+        login_user = "SELECT * FROM users WHERE username = {}".format(username)
+        self.cursor.execute(login_user)
+        return self.cursor.fetchone()
