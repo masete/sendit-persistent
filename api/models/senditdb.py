@@ -21,8 +21,7 @@ class DatabaseConnection:
                     parcel_destination VARCHAR(20) NOT NULL,
                     parcel_weight INTEGER NOT NULL, 
                     parcel_description VARCHAR(20) NOT NULL
-                                                 
-                    
+                                                   
                 )
             """
         )
