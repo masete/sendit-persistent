@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from api.models.models import Parcel, Users
 from api.models.senditdb import DatabaseConnection
-from api.validations import empty_order_fields, invalid_input_types, empty_strings_add_weight
+from api.validations import Validation
 from api.Handlers.error_handlers import InvalidUsage
 from werkzeug.security import check_password_hash, generate_password_hash
 import jwt
@@ -10,6 +10,7 @@ import datetime
 
 
 db = DatabaseConnection()
+val = Validation()
 
 
 parcel_blueprint = Blueprint("parcel", __name__)
@@ -35,8 +36,12 @@ user_blueprint = Blueprint("user", __name__)
 def signup():
     data = request.get_json()
     username = data.get('username')
-    password = data.get('password')
     email = data.get('email')
+    password = data.get('password')
+
+    val_data = val.val_user_signup(username, email, password)
+    if val_data:
+        return jsonify({"message": val_data})
 
     signup_data = db.signup(username, password, email)
     return jsonify({"user": signup_data}), 201
