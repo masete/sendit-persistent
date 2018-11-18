@@ -63,11 +63,11 @@ def get_single_parcel(parcel_id):
 #@token_req
 def cancel_parcel(parcel_id):
     single_parcel = db.get_one_parcel(parcel_id)
-    #for order in parcel_orders:
-        #if order['parcel_id'] == parcel_id:
-            #order['status'] = 'cancelled'
-            #return jsonify(order), 200
-    #return jsonify({"message": "the parcel does not exist"}), 400
+    if not single_parcel:
+        return jsonify({"message": "no parcel to cancel"}), 404
+    order['parcel_id'] == parcel_id
+    order['status'] = 'cancelled'
+    return jsonify({"message": "hey"})
 
 
 #@parcel_blueprint.route('/api/v1/users/<int:user_id>/parcel', methods=['GET'], strict_slashes=False)

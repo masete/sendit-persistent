@@ -1,6 +1,7 @@
 import psycopg2
 from werkzeug.security import generate_password_hash, check_password_hash
-from api.models.models import Parcel, parcels
+from api.models.models import Parcel, Users, parcels, users_list
+from passlib.hash import pbkdf2_sha256 as sha256
 
 
 class DatabaseConnection:
@@ -46,13 +47,16 @@ class DatabaseConnection:
             return True
         return False
 
+    def get_user_by_username(self, username):
+        by_username = "SELECT * FROM users WHERE username= '{}'".format(username)
+        self.cursor.execute(by_username)
+        return self.cursor.fetchone()
+
     def signup(self, username, email, password):
         if not self.get_user(email):
 
             hash_pwd = generate_password_hash(password)
-            insert_user = "INSERT INTO users(username,email,password) VALUES('{}','{}','{}')".format(username, email,
-                                                                                                     hash_pwd)
-
+            insert_user = "INSERT INTO users(username, email, password) VALUES('{}','{}','{}')".format(username, email, hash_pwd)
             self.cursor.execute(insert_user)
             return "user added"
         return "user exist"
@@ -61,6 +65,18 @@ class DatabaseConnection:
         if not self.get_user(email):
             return
         return "signup please"
+
+    def get_all_users(self):
+        users_list.clear()
+        get_all_users = "SELECT * FROM users"
+        self.cursor.execute(get_all_users)
+        results = self.cursor.fetchall()
+        if not results:
+            return False
+        for result in results:
+            user = Users(result[0], result[1], result[2], result[3]).to_dict()
+            users_list.append(user)
+        return users_list
 
     def insert_new_parcel(self, parcel_location, parcel_destination, parcel_weight, parcel_description, status):
 
@@ -90,4 +106,12 @@ class DatabaseConnection:
         parcel = Parcel(result[0], result[1], result[2], result[3], result[4]).to_dict()
         parcels.append(parcel)
         return parcel
+
+    def find_parcel_by_user_id(self, user_id):
+        parcel_by_user_id = "SELECT * FROM sales WHERE user_id = {}".format(user_id)
+        self.cursor.execute(parcel_by_user_id)
+        result = self.cursor.fetchall()
+        if result:
+            par = Parcel(result[0], result[1], result[2], result[3])
+            return par
 

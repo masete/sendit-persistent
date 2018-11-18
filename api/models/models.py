@@ -23,9 +23,12 @@ class Parcel:
         return parcel
 
 
+users_list = []
+
+
 class Users:
 
-    def __init__(self, user_id, username, password, email):
+    def __init__(self, user_id, username, email, password):
         self.user_id = user_id
         self.username = username
         self.password = password
