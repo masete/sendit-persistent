@@ -3,9 +3,11 @@ from api.models.models import parcels
 from api.models.senditdb import DatabaseConnection
 from api.validations import Validation
 from api.Handlers.error_handlers import InvalidUsage
-from functools import wraps
 import datetime
-
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 
 db = DatabaseConnection()
 val = Validation()
@@ -15,7 +17,7 @@ parcel_blueprint = Blueprint("parcel", __name__)
 
 
 @parcel_blueprint.route('/api/v1/parcel', methods=['POST'], strict_slashes=False)
-#@token_req
+@jwt_required
 def create_parcel():
 
     if request.content_type != "application/json":
@@ -43,16 +45,29 @@ def create_parcel():
 
 
 @parcel_blueprint.route('/api/v1/parcel', methods=['GET'], strict_slashes=False)
-#@token_req
+@jwt_required
 def get_all_parcel():
+
+    dtk = jwt.decode(request.header['token'], 'masete_nicholas_secret_key')
+    if dtk['info']['an_admin'] is False:
+        return jsonify({
+            "message": "Please login as user not as admin"
+        }), 403
 
     par = db.get_all_parcels()
     return jsonify({"parcel": par})
 
 
 @parcel_blueprint.route('/api/v1/parcel/<int:parcel_id>', methods=['GET'], strict_slashes=False)
-#@token_req
+@jwt_required
 def get_single_parcel(parcel_id):
+
+    dtk = jwt.decode(request.header['token'], 'masete_nicholas_secret_key')
+    if dtk['info']['an_admin'] is False:
+        return jsonify({
+            "message": "Please login as user not as admin"
+        }), 403
+
     single_parcel = db.get_one_parcel(parcel_id)
     if not single_parcel:
         return jsonify({"message": "parcel does not exist"}), 404
@@ -60,30 +75,24 @@ def get_single_parcel(parcel_id):
 
 
 @parcel_blueprint.route('/api/v1/parcel/<int:parcel_id>/cancel', methods=['PUT'], strict_slashes=False)
-#@token_req
+@jwt_required
 def cancel_parcel(parcel_id):
-    single_parcel = db.get_one_parcel(parcel_id)
-    if not single_parcel:
-        return jsonify({"message": "no parcel to cancel"}), 404
-    order['parcel_id'] == parcel_id
-    order['status'] = 'cancelled'
-    return jsonify({"message": "hey"})
+    if not db.cancel_parcel(parcel_id):
+        return jsonify({"message": "parcel does not exist"}), 404
+    return jsonify({"message":db.cancel_parcel(parcel_id) })
 
 
-#@parcel_blueprint.route('/api/v1/users/<int:user_id>/parcel', methods=['GET'], strict_slashes=False)
-#@token_req
-#def get_parcel_by_user_id(user_id):
-    #single = []
-    #for order in parcel_orders:
-        #if order['user_id'] == user_id:
-            #single.append(order)
-
-    #if len(single) > 0:
-        #return jsonify(single), 200
-    #return jsonify({"message": "there is no such user"}), 400
+@parcel_blueprint.route('/api/v1/users/<int:user_id>/parcel', methods=['GET'], strict_slashes=False)
+@jwt_required
+def get_parcel_by_user_id(user_id):
+    result = db.find_parcel_by_user_id(user_id)
+    if result:
+        return jsonify({"message": result})
+    return jsonify({"message": "user should post some parcels"})
 
 
 @parcel_blueprint.errorhandler(InvalidUsage)
+@jwt_required
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
