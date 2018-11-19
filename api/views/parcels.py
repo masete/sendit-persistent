@@ -88,7 +88,7 @@ def get_parcel_by_user_id(user_id):
     result = db.find_parcel_by_user_id(user_id)
     if result:
         return jsonify({"message": result})
-    return jsonify({"message": "user should post some parcels"})
+    return jsonify({"message": "user should post some parcels here, Thanks"})
 
 
 @parcel_blueprint.errorhandler(InvalidUsage)
