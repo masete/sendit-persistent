@@ -3,12 +3,8 @@ from api.models.models import Users
 from api.models.senditdb import DatabaseConnection
 from api.validations import Validation
 from api.Handlers.error_handlers import InvalidUsage
-from werkzeug.security import check_password_hash
-#import jwt
-from flask import Flask, jsonify, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta
-from functools import wraps
 
 
 db = DatabaseConnection()
@@ -46,15 +42,16 @@ def login():
     if request.content_type != "application/json":
         raise InvalidUsage("Invalid content type", 400)
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    username = data['username']
+    password = data['password']
 
-    check_user = db.get_user_by_username(username)
+    check_user = db.login(username, password)
     if not check_user:
-        return jsonify({"message": "invalid username or password"}), 404
-    if check_password_hash(check_user[3], password):
+        return jsonify({"message": "first signup", 'data': check_user})
 
-        # Identity can be any data that is json serializable
-        access_token = create_access_token(identity=username, expires_delta=timedelta(hours=3))
-        return jsonify(access_token=access_token, message="you have successfully logged in"), 200
+    return jsonify({"access_token": create_access_token(identity=check_user.user_id, expires_delta=timedelta(hours=3)), "message": "logged in successfully"}),\
+        200
+
+
+
 

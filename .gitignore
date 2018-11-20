@@ -5,3 +5,8 @@
 /api/models/__pycache__/
 /api/views__pycache__/
 /api/views/__pycache__/
+/__pycache__/
+/tests/__pycache__/__init__.cpython-36.pyc
+/tests/__pycache__/test_controllers.cpython-36-PYTEST.pyc
+/tests__pycache__/test_controllers.cpython-36.pyc
+/tests__pycache__/test_views.cpython-36.pyc

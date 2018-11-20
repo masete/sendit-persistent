@@ -1,4 +1,6 @@
 
+
+
 parcels = []
 
 
@@ -30,17 +32,36 @@ users_list = []
 
 class Users:
 
-    def __init__(self, user_id, username, email, password):
+    def __init__(self, user_id, username, email, password, admin=False):
         self.user_id = user_id
         self.username = username
         self.password = password
         self.email = email
+        self.admin = admin
 
     def to_dict(self):
         user = {
             'user_id': self.user_id,
             'username': self.username,
             'password': self.password,
-            'email': self.email
+            'email': self.email,
+            'admin': self.admin
         }
         return user
+
+    @classmethod
+    def is_admin(cls, user_id):
+        from api.models.senditdb import DatabaseConnection
+        db = DatabaseConnection()
+        user = db.check_admin_status(user_id)
+        if user:
+            print(user.to_dict())
+            if user.admin:
+                return True
+            return False
+        return False
+
+
+
+
+
