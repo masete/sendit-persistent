@@ -18,7 +18,7 @@ def create_parcel():
 
     user_id = get_jwt_identity()
 
-    if not Users.is_admin(user_id):
+    if Users.is_admin(user_id):
         return jsonify({"message": "your not authorised"}), 401
 
     if request.content_type != "application/json":
@@ -51,7 +51,7 @@ def create_parcel():
 def get_all_parcel():
     user_id = get_jwt_identity()
 
-    if not Users.is_admin(user_id):
+    if Users.is_admin(user_id):
         return jsonify({"message": "your not authorised"}), 401
 
     par = db.get_all_parcels()
@@ -63,13 +63,13 @@ def get_all_parcel():
 def get_single_parcel(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users.is_admin(user_id):
+    if Users.is_admin(user_id):
         return jsonify({"message": "your not authorised"}), 401
 
     single_parcel = db.get_one_parcel(parcel_id)
     if not single_parcel:
         return jsonify({"message": "parcel does not exist"}), 404
-    return jsonify({"single_parcel": single_parcel})
+    return jsonify({"single_parcel": single_parcel}), 200
 
 
 @parcel_blueprint.route('/api/v1/parcel/<int:parcel_id>/cancel', methods=['PUT'], strict_slashes=False)
@@ -77,7 +77,7 @@ def get_single_parcel(parcel_id):
 def cancel_parcel(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users.is_admin(user_id):
+    if Users.is_admin(user_id):
         return jsonify({"message": "your not authorised"}), 401
     if not db.cancel_parcel(parcel_id):
         return jsonify({"message": "parcel does not exist"}), 404
@@ -89,7 +89,7 @@ def cancel_parcel(parcel_id):
 def get_parcel_by_user_id(user_id):
     user_id = get_jwt_identity()
 
-    if not Users.is_admin(user_id):
+    if Users.is_admin(user_id):
         return jsonify({"message": "your not authorised"}), 401
     result = db.find_parcel_by_user_id(user_id)
     if result:
@@ -102,12 +102,29 @@ def get_parcel_by_user_id(user_id):
 def change_destination(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users.is_admin(user_id):
+    if Users.is_admin(user_id):
         return jsonify({"message": "your not authorised"}), 401
     data = request.get_json()
     parcel_destination = data.get('parcel_destination')
     parcel = db.change_destination(parcel_destination, parcel_id)
     return jsonify({"parcel": parcel})
+
+
+@parcel_blueprint.route('/api/v1/parcels/<int:parcel_id>/status', methods=['PUT'], strict_slashes=False)
+@jwt_required
+def admin_change_status(parcel_id):
+    user_id = get_jwt_identity()
+
+    if not Users.is_admin(user_id):
+        return jsonify({"message": "This operations is only to be done by the admin"})
+    data = request.get_json()
+    status = data.get('status')
+    admin_status = db.admin_change_status(parcel_id, user_id, status)
+    return jsonify({"message": "parcel status changed successfully"})
+
+
+
+
 
 
 @parcel_blueprint.errorhandler(InvalidUsage)
@@ -116,3 +133,4 @@ def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
+
