@@ -1,7 +1,8 @@
 import psycopg2
+import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.models.models import Parcel, Users, parcels, users_list
-from passlib.hash import pbkdf2_sha256 as sha256
+from flask import jsonify
 
 
 class DatabaseConnection:
@@ -30,31 +31,81 @@ class DatabaseConnection:
                 )
             """
         )
+        #from run import app
+        if os.getenv("FLASK_ENV") == "production":
+            self.connection = psycopg2.connect(os.getenv("DATABASE.URL"))
 
-        self.connection = psycopg2.connect(dbname='senditdb',
-                                           user='postgres',
-                                           password='qwerty',
-                                           host='localhost',
-                                           port='5432')
+        elif os.getenv("FLASK_ENV") == "TESTING":
+            print('Connecting to test db')
+            self.connection = psycopg2.connect(dbname='test_senditdb',
+                                               user='postgres',
+                                               password='qwerty',
+                                               host='localhost',
+                                               port='5432')
+        else:
+            print('Connecting development db')
+            self.connection = psycopg2.connect(dbname='senditdb',
+                                               user='postgres',
+                                               password='qwerty',
+                                               host='localhost',
+                                               port='5432')
         self.connection.autocommit = True
         self.cursor = self.connection.cursor()
         print(self.cursor)
+        self.create_tables()
+        self.create_admin()
+
+    def drop_tables(self):
+        query = "DROP TABLE IF EXISTS {} CASCADE"
+        tabl_names = ["parcel, users"]
+        for name in tabl_names:
+            self.cursor.execute(query.format(name))
+
+    def create_tables(self):
         for command in self.commands:
             self.cursor.execute(command)
-        self.check_admin()
 
-    def check_admin(self):
+    def create_admin(self):
         self.cursor.execute("SELECT * FROM users WHERE email= '{}'".format("admin@gmail.com"))
         if self.cursor.fetchone():
             return None
+        # set admin user
+        hash_pwd = generate_password_hash("masete24")
         self.cursor.execute("INSERT INTO users(username, email, password, an_admin) VALUES('admin', 'admin@gmail.com', "
-                            "'pbkdf2:sha256:50000$q5STunEW$09107a77f6c6a7d7042aa1d1e5755736ea128a2eeac0219724bfeddf91"
-                            "bfd88b', true)")
+                            "'{}', true)".format(hash_pwd))
+
+    def get_user_by_id(self, user_id):
+        get_user = self.cursor.execute("SELECT * FROM users WHERE user_id = '{}'".format(user_id))
+        self.cursor.execute(get_user)
+        result = self.cursor.fetchone()
+        if result:
+            user = Users(result[0], result[1], result[2], result[3]).to_dict()
+            return user
+
+    def check_admin_status(self, user_id):
+        query = "SELECT * FROM users WHERE user_id = '{}'".format(user_id)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        if result:
+            user = Users(result[0], result[1], result[2], result[3], result[4])  # .to_dict()
+            return user
+        return None
 
     def get_user(self, email):
         self.cursor.execute("SELECT * FROM users WHERE email='{}'".format(email))
         if self.cursor.fetchone():
             return True
+        return False
+
+    def login(self, username, password):
+        query = "SELECT * FROM users WHERE username='{}'".format(username)
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        if not result:
+            return False
+        if check_password_hash(result[3], password):
+            user = Users(result[0], result[1], result[2], result[3], result[4])  # .to_dict()
+            return user
         return False
 
     def get_user_by_username(self, username):
@@ -64,17 +115,12 @@ class DatabaseConnection:
 
     def signup(self, username, email, password):
         if not self.get_user(email):
-
             hash_pwd = generate_password_hash(password)
-            insert_user = "INSERT INTO users(username, email, password) VALUES('{}','{}','{}')".format(username, email, hash_pwd)
+            insert_user = "INSERT INTO users(username, email, password) VALUES('{}','{}','{}')".format(username, email,
+                                                                                                       hash_pwd)
             self.cursor.execute(insert_user)
             return "user added"
         return "user exist"
-
-    def login(self, email):
-        if not self.get_user(email):
-            return
-        return "signup please"
 
     def get_all_users(self):
         users_list.clear()
@@ -88,11 +134,14 @@ class DatabaseConnection:
             users_list.append(user)
         return users_list
 
-    def insert_new_parcel(self, parcel_location, parcel_destination, parcel_weight, parcel_description, status):
+    def insert_new_parcel(self, user_id, parcel_location, parcel_destination, parcel_weight, parcel_description,
+                          status):
 
-        insert_parcel = "INSERT INTO parcel(parcel_location, parcel_destination, parcel_weight, parcel_description, " \
-                        "status ) VALUES('{}','{}','{}','{}','{}')".format(parcel_location, parcel_destination,
-                                                                           parcel_weight, parcel_description, status)
+        insert_parcel = "INSERT INTO parcel(user_id, parcel_location, parcel_destination, parcel_weight, parcel_description, " \
+                        "status ) VALUES('{}','{}','{}','{}','{}','{}')".format(user_id, parcel_location,
+                                                                                parcel_destination,
+                                                                                parcel_weight, parcel_description,
+                                                                                status)
         self.cursor.execute(insert_parcel)
         return "parcel successfully created"
 
@@ -155,5 +204,34 @@ class DatabaseConnection:
         }
         return [pcl]
 
+    def change_destination(self, parcel_destination, parcel_id):
+        # query = "SELECT * FROM parcel WHERE parcel_id = {} AND user_id = {}".format(parcel_id, user_id)
+        # self.cursor.execute(query)
+        # if not self.cursor.fetchone():
+        # return False
+        change = "UPDATE parcel SET parcel_destination = '{}' WHERE parcel_id = '{}'".format(parcel_destination,
+                                                                                             parcel_id)
+        self.cursor.execute(change)
+        # result = self.cursor.fetchone()
+        # # parcel_id, parcel_location, parcel_destination, parcel_weight, parcel_description, status)
+        #
+        # parcel = Parcel(result[0], result[1], result[2], result[3], result[4], result[5]).to_dict()
+        return True
 
+    def change(self, parcel_id, user_id, parcel_destination):
+        query = "SELECT * FROM parcel WHERE parcel_id = '{}'".format(parcel_id)
+        self.cursor.execute(query)
+        data = self.cursor.fetchone()
+        if not data:
+            return jsonify({"message": "there is not data"})
+        if data[1] != user_id:
+            return jsonify({"message": "you cant change this destination"})
 
+        query1 = "UPDATE parcel SET parcel_destination = '{}' WHERE parcel_id = '{}'".format(parcel_destination,
+                                                                                             parcel_id)
+        self.cursor.execute(query1)
+        self.connection.commit()
+
+        query2 = "SELECT * FROM parcel WHERE parcel_id = '{}'".format(parcel_id)
+        self.cursor.execute(query2)
+        return self.cursor.fetchone()
