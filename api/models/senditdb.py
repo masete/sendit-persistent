@@ -152,7 +152,7 @@ class DatabaseConnection:
         if not results:
             return False
         for result in results:
-            parcel = Parcel(result[0], result[1], result[2], result[3], result[4]).to_dict()
+            parcel = Parcel(result[0], result[1], result[2], result[3], result[4], result[5]).to_dict()
             parcels.append(parcel)
         return parcels
 
@@ -229,6 +229,42 @@ class DatabaseConnection:
 
         query1 = "UPDATE parcel SET parcel_destination = '{}' WHERE parcel_id = '{}'".format(parcel_destination,
                                                                                              parcel_id)
+        self.cursor.execute(query1)
+        self.connection.commit()
+
+        query2 = "SELECT * FROM parcel WHERE parcel_id = '{}'".format(parcel_id)
+        self.cursor.execute(query2)
+        return self.cursor.fetchone()
+
+    def admin_change_status(self, parcel_id, user_id, status):
+
+        query = "SELECT * FROM parcel WHERE parcel_id = '{}'".format(parcel_id)
+        self.cursor.execute(query)
+        data = self.cursor.fetchone()
+        if not data:
+            return jsonify({"message": "there are no parcels currently intransit"})
+        if data[1] != user_id:
+            return jsonify({"message": "hey, you dont have rights to edit this"})
+
+        query1 = "  UPDATE parcel SET status = '{}' WHERE parcel_id = '{}'".format(status, parcel_id)
+        self.cursor.execute(query1)
+        self.connection.commit()
+
+        query2 = "SELECT * FROM parcel WHERE parcel_id = '{}'".format(parcel_id)
+        self.cursor.execute(query2)
+        return self.cursor.fetchone()
+
+    def admin_change_location(self, parcel_id, user_id, parcel_location):
+
+        query = "SELECT * FROM parcel WHERE parcel_id = '{}'".format(parcel_id)
+        self.cursor.execute(query)
+        data = self.cursor.fetchone()
+        if not data:
+            return jsonify({"message": "hey nothing to edit"})
+        if data[1] != user_id:
+            return jsonify({"message": "hey, you dont have rights to edit this"})
+
+        query1 = "  UPDATE parcel SET parcel_location = '{}' WHERE parcel_id = '{}'".format(status, parcel_id)
         self.cursor.execute(query1)
         self.connection.commit()
 

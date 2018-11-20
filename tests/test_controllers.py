@@ -54,7 +54,7 @@ class TestEndpoints(unittest.TestCase):
         return token
 
     def test_create_parcel(self):
-        token = self.get_admin_token()
+        token = self.get_user_token()
 
         parcel_order = dict(parcel_description='some important stuff', parcel_location="mbarara", parcel_destination="kitgum",
                             parcel_weight=34, status="pending")
@@ -62,7 +62,6 @@ class TestEndpoints(unittest.TestCase):
         request1 = self.app.post('/api/v1/parcel', json=parcel_order, headers={'Authorization': 'Bearer ' + token})
         response1 = json.loads(request1.data.decode())
         self.assertIn("parcel with description", response1["message"])
-
 
     def get_user_token(self):
         signup = dict(username="masete", email="masete@gmail.com", password="masete24")
@@ -74,6 +73,21 @@ class TestEndpoints(unittest.TestCase):
         token = response['access_token']
         return token
 
+    def test_get_all_parcel(self):
+        pass
+
+    def test_get_single_parcel(self):
+        token = self.get_user_token()
+
+        post_add2 = dict(parcel_id=1, parcel_location="mbale", parcel_destination="manafwa", parcel_weight=23,
+                         parcel_description="mangoes", status="pending")
+        response1 = self.app.post('/api/v1/parcel', json=post_add2,
+                                    headers={'Authorization': 'Bearer ' + token})
+        response = self.app.get('/api/v1/parcel/1', headers={'Authorization': 'Bearer ' + token})
+        self.assertEqual(response.status_code, 200)
+        #assert json.loads(post_add2.data)['parcel_location'] == 'mbale'
+        #assert response.status_code == 200
+        #assert response.headers["Content-Type"] == "application/json"
 
         #
         # login = dict(username="admin",email="" password="admin")
@@ -171,7 +185,7 @@ class TestEndpoints(unittest.TestCase):
     #def test_user_id_fields(self):
         #post_order = dict(parcel_location="kisumu", parcel_destination="mbale", parcel_weight=78,
                           #parcel_description="apples", user_id=-1, status="pending")
-        #response = self.app.post('/api/v1/parcel', json=post_order, headers={"token": self.user_generated_token})
+        #response = self.app.ppost('/api/v1/parcel', json=post_order, headers={"token": self.user_generated_token})
         #assert "error" in str(response.data)
         #assert response.status_code == 400
         #assert response.headers["Content-Type"] == "application/json"
