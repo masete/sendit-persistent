@@ -1,10 +1,12 @@
 from flask import Blueprint, jsonify, request
 from api.models.models import Users
-from api.models.senditdb import DatabaseConnection
-from api.validations import Validation
-from api.Handlers.error_handlers import InvalidUsage
+from api.models.database import DatabaseConnection
+from api.models.models import DatabaseModels
+from api.Helpers.validations import Validation
+from api.Helpers.error_handlers import InvalidUsage
 from flask_jwt_extended import (jwt_required, get_jwt_identity)
 
+kd = DatabaseModels
 db = DatabaseConnection()
 val = Validation()
 
@@ -121,6 +123,18 @@ def admin_change_status(parcel_id):
     status = data.get('status')
     admin_status = db.admin_change_status(parcel_id, user_id, status)
     return jsonify({"message": "parcel status changed successfully"})
+
+@parcel_blueprint.route('/api/v1/parcels/<int:parcel_id>/present_location', methods=['PUT'], strict_slashes=False)
+@jwt_required
+def admin_change_location(parcel_id):
+    user_id = get_jwt_identity()
+
+    if not Users.is_admin(user_id):
+        return jsonify({"message": "This operations is only to be done by the admin"})
+    data = request.get_json()
+    status = data.get('status')
+    admin_location = db.admin_change_location(parcel_id, user_id, status)
+    return jsonify({"message": "parcel location changed successfully", "data": admin_location})
 
 
 

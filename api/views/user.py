@@ -1,12 +1,13 @@
 from flask import Blueprint, jsonify, request
-from api.models.models import Users
-from api.models.senditdb import DatabaseConnection
-from api.validations import Validation
-from api.Handlers.error_handlers import InvalidUsage
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from api.models.database import DatabaseConnection
+from api.Helpers.error_handlers import InvalidUsage
+from api.Helpers.validations import Validation
+from flask_jwt_extended import create_access_token, jwt_required
 from datetime import timedelta
+from api.models.models import DatabaseModels
 
 
+ke= DatabaseModels()
 db = DatabaseConnection()
 val = Validation()
 
@@ -25,7 +26,7 @@ def signup():
     if val_data:
         return jsonify({"message": val_data})
 
-    signup_data = db.signup(username, email, password)
+    signup_data = ke.signup(username, email, password)
     return jsonify({"user": signup_data}), 201
 
 

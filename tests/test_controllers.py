@@ -1,6 +1,6 @@
 import unittest
 import json
-from api.models.senditdb import DatabaseConnection
+from api.models.database import DatabaseConnection
 
 
 from run import create_app
