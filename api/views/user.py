@@ -30,7 +30,7 @@ def signup():
 
     if not signup_data:
         return jsonify({"message": "user already exists"})
-    return jsonify({"signedup user": signup_data}), 201
+    return jsonify({"message": "user signed up successfully"}), 201
 
 
 @user_blueprint.route('/api/v1/user', methods=['GET'])
@@ -61,10 +61,9 @@ def login():
         )
         return jsonify(
             {"access_token": create_access_token(identity=my_identity, expires_delta=timedelta(hours=3)),
-             "message": "logged in successfully"}), \
-               200
+             "message": "logged in successfully"}), 200
 
-    return jsonify({"message": "first signup"})
+    return jsonify({"message": "first create an account please"})
 
 
 

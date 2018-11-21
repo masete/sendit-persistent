@@ -5,9 +5,8 @@ from api.Helpers.error_handlers import InvalidUsage
 from api.models.auth import Users
 from flask_jwt_extended import (jwt_required, get_jwt_identity)
 
-kd = Parcel()
+parcel = Parcel()
 val = Validation()
-
 
 
 parcel_blueprint = Blueprint("parcel", __name__)
@@ -19,7 +18,7 @@ def create_parcel():
 
     user_id = get_jwt_identity()
 
-    if not Users(user_id):
+    if user_id['user_role']:
         return jsonify({"message": "your not authorised"}), 401
 
     if request.content_type != "application/json":
@@ -43,7 +42,7 @@ def create_parcel():
     if empty_strings:
         raise InvalidUsage(empty_strings, 400)
 
-    kd.insert_new_parcel(user_id, parcel_location, parcel_destination, parcel_weight, parcel_description, status)
+    parcel.insert_new_parcel(user_id, parcel_location, parcel_destination, parcel_weight, parcel_description, status)
     return jsonify({'message': "parcel with description {} has been added".format(parcel_description)}), 201
 
 
@@ -52,10 +51,10 @@ def create_parcel():
 def get_all_parcel():
     user_id = get_jwt_identity()
 
-    if not Users(user_id):
+    if user_id['user_role']:
         return jsonify({"message": "your not authorised"}), 401
 
-    par = kd.get_all_parcels()
+    par = parcel.get_all_parcels()
     return jsonify({"parcel": par})
 
 
@@ -64,10 +63,10 @@ def get_all_parcel():
 def get_single_parcel(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users(user_id):
+    if user_id['user_role']:
         return jsonify({"message": "your not authorised"}), 401
 
-    single_parcel = kd.get_one_parcel(parcel_id)
+    single_parcel = parcel.get_one_parcel(parcel_id)
     if not single_parcel:
         return jsonify({"message": "parcel does not exist"}), 404
     return jsonify({"single_parcel": single_parcel}), 200
@@ -78,10 +77,10 @@ def get_single_parcel(parcel_id):
 def cancel_parcel(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users(user_id):
+    if user_id['user_role']:
         return jsonify({"message": "your not authorised"}), 401
 
-    result = kd.cancel_parcel(parcel_id)
+    result = parcel.cancel_parcel(parcel_id)
     if not result:
         return jsonify({"message": "parcel does not exist"}), 404
     return jsonify({"message": result})
@@ -90,13 +89,16 @@ def cancel_parcel(parcel_id):
 @parcel_blueprint.route('/api/v1/users/<int:user_id>/parcel', methods=['GET'], strict_slashes=False)
 @jwt_required
 def get_parcel_by_user_id(user_id):
-    user_id = get_jwt_identity()
+    loggedin_user_id = get_jwt_identity()
+    print(loggedin_user_id)
 
-    if not Users(user_id):
+    if user_id['user_role']:
         return jsonify({"message": "your not authorised"}), 401
-    result = kd.find_parcel_by_user_id(user_id)
+    result = parcel.find_parcel_by_user_id(user_id)
+    print(user_id)
     if result:
         return jsonify({"message": result})
+
     return jsonify({"message": "user should post some parcels here, Thanks"}), 400
 
 
@@ -105,12 +107,12 @@ def get_parcel_by_user_id(user_id):
 def change_destination(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users(user_id):
+    if not user_id['user_role']:
         return jsonify({"message": "your not authorised"}), 401
     data = request.get_json()
     parcel_destination = data.get('parcel_destination')
-    parcel = kd.change_destination(parcel_destination, parcel_id)
-    return jsonify({"parcel": parcel})
+    parcel2 = parcel.change_destination(parcel_destination, parcel_id)
+    return jsonify({"parcel": parcel2})
 
 
 @parcel_blueprint.route('/api/v1/parcels/<int:parcel_id>/status', methods=['PUT'], strict_slashes=False)
@@ -122,7 +124,7 @@ def admin_change_status(parcel_id):
         return jsonify({"message": "This operations is only to be done by the admin"})
     data = request.get_json()
     status = data.get('status')
-    admin_status = kd.admin_change_status(parcel_id, user_id, status)
+    admin_status = parcel.admin_change_status(parcel_id, user_id, status)
     return jsonify({"message": "parcel status changed successfully", "status changed": admin_status})
 
 
@@ -135,7 +137,7 @@ def admin_change_location(parcel_id):
         return jsonify({"message": "This operations is only to be done by the admin"})
     data = request.get_json()
     parcel_location = data.get('parcel_location')
-    admin_location = kd.admin_change_location(parcel_id, user_id, parcel_location)
+    admin_location = parcel.admin_change_location(parcel_id, user_id, parcel_location)
     return jsonify({"message": "parcel location changed successfully", "data": admin_location})
 
 

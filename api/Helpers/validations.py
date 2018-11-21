@@ -7,7 +7,7 @@ class Validation:
             return "Fill field cannot be empty"
 
         if not re.match(r"^([a-zA-Z\d]+[-_])*[a-zA-Z\d*]+$", username):
-            return "username must have no white spaces"
+            return "Invalid username"
 
         if not email or not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email):
             return "enter correct email format e.g masete@gmail.com"

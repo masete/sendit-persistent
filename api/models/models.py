@@ -19,12 +19,11 @@ class Parcel:
 
     def insert_new_parcel(self, user_id, parcel_location, parcel_destination, parcel_weight, parcel_description,
                           status):
-        insert_parcel = "INSERT INTO parcel(parcel_location, parcel_destination, parcel_weight, parcel_" \
-                        "description, " \
-                        "status ) VALUES('{}','{}','{}','{}','{}')".format(parcel_location,
-                                                                           parcel_destination,
-                                                                           parcel_weight, parcel_description,
-                                                                           status)
+        insert_parcel = "INSERT INTO parcel(parcel_location, parcel_destination, parcel_weight, parcel_description, " \
+                        "status ) VALUES('{}','{}','{}','{}','{}','{}')".format(user_id, parcel_location,
+                                                                                parcel_destination,
+                                                                                parcel_weight, parcel_description,
+                                                                                status)
         self.cursor.execute(insert_parcel)
         return "parcel successfully created"
 
@@ -43,6 +42,7 @@ class Parcel:
     def find_parcel_by_user_id(self, user_id):
         self.cursor.execute = "SELECT * FROM parcel WHERE user_id = {}".format(user_id)
         check_user_id = self.cursor.fetchall()
+        print(user_id)
         parcels_by_user = []
         for parcel in check_user_id:
             parcels_by_user.append(parcel)
