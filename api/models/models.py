@@ -1,33 +1,11 @@
 from api.models.database import DatabaseConnection
-from werkzeug.security import check_password_hash, generate_password_hash
 from flask import jsonify
 from api.models.order import Parcel, parcels
-from api.models.auth import Users, users_list
+from api.models.auth import Users
 
-db = DatabaseConnection()
-
+cursor = DatabaseConnection().cursor
 
 class DatabaseModels:
-
-    def __init__(self):
-        self.connection = db.connection
-        self.cursor = db.cursor
-        self.commands = db.commands
-
-
-
-    @classmethod
-    def is_admin(cls, user_id):
-        from api.models.database import DatabaseConnection
-        db = DatabaseConnection()
-        user = db.check_admin_status(user_id)
-        if user:
-            print(user.to_dict())
-            if user.admin:
-                return True
-            return False
-        return False
-
     def drop_tables(self):
         query = "DROP TABLE IF EXISTS {} CASCADE"
         tabl_names = ["parcel, users"]
@@ -38,21 +16,12 @@ class DatabaseModels:
         for command in self.commands:
             self.cursor.execute(command)
 
-    def create_admin(self):
-        self.cursor.execute("SELECT * FROM users WHERE email= '{}'".format("admin@gmail.com"))
-        if self.cursor.fetchone():
-            return None
-        # set admin user
-        hash_pwd = generate_password_hash("masete24")
-        self.cursor.execute("INSERT INTO users(username, email, password, an_admin) VALUES('admin', 'admin@gmail.com', "
-                            "'{}', true)".format(hash_pwd))
-
     def get_user_by_id(self, user_id):
         get_user = self.cursor.execute("SELECT * FROM users WHERE user_id = '{}'".format(user_id))
         self.cursor.execute(get_user)
         result = self.cursor.fetchone()
         if result:
-            user = Users(result[0], result[1], result[2], result[3]).to_dict()
+            user = Users(result[0], result[1], result[2], result[3])
             return user
 
     def check_admin_status(self, user_id):
@@ -60,7 +29,7 @@ class DatabaseModels:
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         if result:
-            user = Users(result[0], result[1], result[2], result[3], result[4])  # .to_dict()
+            user = Users(result[0], result[1], result[2], result[3], result[4])
             return user
         return None
 
@@ -70,30 +39,10 @@ class DatabaseModels:
             return True
         return False
 
-    def login(self, username, password):
-        query = "SELECT * FROM users WHERE username='{}'".format(username)
-        self.cursor.execute(query)
-        result = self.cursor.fetchone()
-        if not result:
-            return False
-        if check_password_hash(result[3], password):
-            user = Users(result[0], result[1], result[2], result[3], result[4])  # .to_dict()
-            return user
-        return False
-
     def get_user_by_username(self, username):
         by_username = "SELECT * FROM users WHERE username= '{}'".format(username)
         self.cursor.execute(by_username)
         return self.cursor.fetchone()
-
-    def signup(self, username, email, password):
-        if not self.get_user(email):
-            hash_pwd = generate_password_hash(password)
-            insert_user = "INSERT INTO users(username, email, password) VALUES('{}','{}','{}')".format(username, email,
-                                                                                                       hash_pwd)
-            self.cursor.execute(insert_user)
-            return "user added"
-        return "user exist"
 
     def get_all_users(self):
         users_list.clear()
@@ -103,7 +52,7 @@ class DatabaseModels:
         if not results:
             return False
         for result in results:
-            user = Users(result[0], result[1], result[2], result[3]).to_dict()
+            user = Users(result[0], result[1], result[2], result[3])
             users_list.append(user)
         return users_list
 
@@ -125,7 +74,7 @@ class DatabaseModels:
         if not results:
             return False
         for result in results:
-            parcel = Parcel(result[0], result[1], result[2], result[3], result[4], result[5]).to_dict()
+            parcel = Parcel(result[0], result[1], result[2], result[3], result[4], result[5])
             parcels.append(parcel)
         return parcels
 
@@ -135,7 +84,7 @@ class DatabaseModels:
         result = self.cursor.fetchone()
         if not result:
             return False
-        parcel = Parcel(result[0], result[1], result[2], result[3], result[4], result[5]).to_dict()
+        parcel = Parcel(result[0], result[1], result[2], result[3], result[4], result[5])
         parcels.append(parcel)
         return parcel
 
@@ -242,5 +191,11 @@ class DatabaseModels:
         query2 = "SELECT * FROM parcel WHERE parcel_id = '{}'".format(parcel_id)
         self.cursor.execute(query2)
         return self.cursor.fetchone()
+
+
+
+
+
+"""
 
 

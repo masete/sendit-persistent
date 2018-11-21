@@ -8,10 +8,11 @@ def create_app():
     app.config['JWT_SECRET_KEY'] = 'masete'
     jwt = JWTManager(app)
 
-    from api.views.parcels import parcel_blueprint as parcel_blueprint
     from api.views.user import user_blueprint as user_blueprint
+    from api.views.parcels import parcel_blueprint as parcel_blueprint
 
-    app.register_blueprint(parcel_blueprint)
     app.register_blueprint(user_blueprint)
+    app.register_blueprint(parcel_blueprint)
+
 
     return app
