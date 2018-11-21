@@ -113,9 +113,6 @@ class TestEndpoints(unittest.TestCase):
         # self.result = json.loads(login_result.data)
         # self.user_generated_token = self.result['token']
     #
-    # def test_token(self):
-    #     self.assertNotEqual(self.result['token'], " ")
-    #
     # def signup_user(self):
     #     register_user = dict(username="masete", email="masete@gmail.com", password=12345)
     #     response = self.app.post('/api/auth/signup', json=register_user, headers={"token": self.user_generated_token})
@@ -129,13 +126,6 @@ class TestEndpoints(unittest.TestCase):
     # def test_data_structure(self):
     #     self.assertTrue(isinstance(parcel_orders, list))
     #
-    # def test_create_parcel(self):
-    #     post_order = dict(parcel_location="kisumu", parcel_destination="meru", parcel_weight=48,
-    #                       parcel_description="apples", user_id=1, status="pending")
-    #     response = self.app.post('/api/v1/parcel', json=post_order, headers={"token": self.user_generated_token})
-    #     assert "message" in str(response.data)
-    #     assert response.status_code == 201
-    #     assert response.headers["Content-Type"] == "application/json"
     #
     # def test_empty_parcel_location_fields(self):
     #     post_order = dict(parcel_location=" ", parcel_destination="meru", parcel_weight=48,
@@ -251,26 +241,28 @@ class TestEndpoints(unittest.TestCase):
     #     assert response3.headers["Content-Type"] == "application/json"
     #     assert "jinja" and "kisumu" in str(response3.data)
     #
-    # def test_get_parcel_by_id(self):
-    #     response = self.app.post('/api/v1/parcel',headers={"token": self.user_generated_token} )
-    #     response1 = self.app.get('/api/v1/parcel/1' ,headers={"token": self.user_generated_token})
-    #     response2 = self.app.get('api/v1/parcel/w',headers={"token": self.user_generated_token} )
-    #     assert response1.status_code == 200
-    #     assert response2.status_code == 404
-    #     assert response1.headers["Content-Type"] == "application/json"
-    #
-    # def test_parcel_by_user_id(self):
-    #     response = self.app.post('/api/v1/parcel',headers={"token": self.user_generated_token})
-    #     response1 = self.app.get('/api/v1/users/1/parcel',headers={"token": self.user_generated_token})
-    #     response2 = self.app.get('/api/v1/users/w/parcel',headers={"token": self.user_generated_token})
-    #     assert response1.status_code == 200
-    #     assert response2.status_code == 404
-    #     assert response1.headers["Content-Type"] == "application/json"
-    #
-    # def test_cancel_parcel(self):
-    #     response = self.app.post('/api/v1/parcel',headers={"token": self.user_generated_token})
-    #     response2 = self.app.get('/api/v1/parcel/h/cancel', headers={"token": self.user_generated_token})
-    #     assert response2.status_code == 404
-    #
-    #
+    #def test_get_parcel_by_id(self):
+     #   token = self.get_user_token()
+        #response = self.app.post('/api/v1/parcel',headers={'Authorization': 'Bearer ' + token})
+      #  response1 = self.app.get('/api/v1/parcel/1' ,headers={'Authorization': 'Bearer ' + token})
+      #  response2 = self.app.get('api/v1/parcel/w',headers={'Authorization': 'Bearer ' + token})
+     #   assert response1.status_code == 200
+     #   assert response2.status_code == 404
+     #   assert response1.headers["Content-Type"] == "application/json"
+
+    #def test_parcel_by_user_id(self):
+     #   token = self.get_user_token()
+     #   response1 = self.app.get('/api/v1/users/1/parcel', headers={'Authorization': 'Bearer ' + token})
+     #   response2 = self.app.get('/api/v1/users/w/parcel', headers={'Authorization': 'Bearer ' + token})
+     #   assert response1.status_code == 200
+     #   assert response2.status_code == 404
+     #   assert response1.headers["Content-Type"] == "application/json"
+
+    def test_cancel_parcel(self):
+        token = self.get_user_token()
+        response = self.app.post('/api/v1/parcel',headers={'Authorization': 'Bearer ' + token})
+        response2 = self.app.get('/api/v1/parcel/h/cancel', headers={'Authorization': 'Bearer ' + token})
+        assert response2.status_code == 404
+
+
 

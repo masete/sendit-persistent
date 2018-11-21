@@ -97,7 +97,7 @@ def get_parcel_by_user_id(user_id):
     result = kd.find_parcel_by_user_id(user_id)
     if result:
         return jsonify({"message": result})
-    return jsonify({"message": "user should post some parcels here, Thanks"})
+    return jsonify({"message": "user should post some parcels here, Thanks"}), 400
 
 
 @parcel_blueprint.route('/api/v1/parcels/<int:parcel_id>/destination', methods=['PUT'], strict_slashes=False)
