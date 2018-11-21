@@ -1,7 +1,7 @@
 import psycopg2
 import os
 from psycopg2.extras import RealDictCursor
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
 
 class DatabaseConnection:
@@ -13,7 +13,7 @@ class DatabaseConnection:
                     username VARCHAR(50) NOT NULL,
                     email VARCHAR(100) NOT NULL,
                     password VARCHAR(200) NOT NULL,
-                    role VARCHAR(25)
+                    role BOOLEAN DEFAULT FALSE NOT NULL
                     )
 
             """,
@@ -62,6 +62,7 @@ class DatabaseConnection:
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
 
+
             for command in self.commands:
                 self.cursor.execute(command)
         except Exception as error:
@@ -72,9 +73,19 @@ class DatabaseConnection:
             return None
         # set admin user
         hash_pwd = generate_password_hash("masete24")
-        sql = "INSERT INTO users(username, email, password, role) VALUES('admin', 'admin@gmail.com', '{}', 'admin')"\
+        sql = "INSERT INTO users(username, email, password, role) VALUES('admin', 'admin@gmail.com', '{}', True)"\
             .format(hash_pwd)
 
         self.cursor.execute(sql)
         self.connection.commit()
+
+    def drop_tables(self):
+        query = "DROP TABLE IF EXISTS {} CASCADE"
+        tabl_names = ["parcel, users"]
+        for name in tabl_names:
+            self.cursor.execute(query.format(name))
+
+    def create_tables(self):
+        for command in self.commands:
+            self.cursor.execute(command)
 

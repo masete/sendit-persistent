@@ -2,6 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from api.models.database import DatabaseConnection
 
 cursor = DatabaseConnection().cursor
+users_list = []
 
 
 class Users:
@@ -12,10 +13,20 @@ class Users:
         self.email = email
         self.admin = admin
 
+
+    @staticmethod
+    def get_user_by_username(username):
+        result = "SELECT * FROM users WHERE username = '{}'".format(username)
+        cursor.execute(result)
+        query1 = cursor.fetchone()
+        if not query1:
+            return False
+        return query1
+
     def check_password(self, hash, password):
         return check_password_hash(hash, password)
 
-    def fetch_user(self, username, password=None, user_id=None):
+    def fetch_user(self, user_id, username, password=None):
 
         fetch_user_query = f""" SELECT username, password FROM users
                WHERE username='{username}'
@@ -57,11 +68,19 @@ class Users:
 
     def check_admin_status(self, user_id):
         query = "SELECT * FROM users WHERE user_id = '{}'".format(user_id)
-        self.cursor.execute(query)
-        result = self.cursor.fetchone()
+        cursor.execute(query)
+        result = cursor.fetchone()
         if result:
             user = Users(result[0], result[1], result[2], result[3])
             return user
         return None
+
+    def get_all_users(self):
+        users_list.clear()
+        get_all_users = "SELECT * FROM users"
+        cursor.execute(get_all_users)
+        results = cursor.fetchall()
+        users_list.append(results)
+        return users_list
 
 

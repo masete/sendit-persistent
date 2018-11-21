@@ -33,7 +33,7 @@ class TestEndpoints(unittest.TestCase):
         signup = dict(username="joel", email="joel@gmail.com", password="joel1234")
         request = self.app.post('/api/auth/signup', json=signup)
         response = json.loads(request.data.decode())
-        self.assertIn('user added', str(response))
+        self.assertIn('signedup user', str(response))
         self.assertEqual(request.status_code, 201)
 
     def test_log_in_user_in_system(self):

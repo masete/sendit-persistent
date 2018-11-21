@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from api.models.order import Parcel
+from api.models.models import Parcel
 from api.Helpers.validations import Validation
 from api.Helpers.error_handlers import InvalidUsage
 from api.models.auth import Users
@@ -80,9 +80,11 @@ def cancel_parcel(parcel_id):
 
     if not Users(user_id):
         return jsonify({"message": "your not authorised"}), 401
-    if not kd.cancel_parcel(parcel_id):
+
+    result = kd.cancel_parcel(parcel_id)
+    if not result:
         return jsonify({"message": "parcel does not exist"}), 404
-    return jsonify({"message": kd.cancel_parcel(parcel_id)})
+    return jsonify({"message": result})
 
 
 @parcel_blueprint.route('/api/v1/users/<int:user_id>/parcel', methods=['GET'], strict_slashes=False)
@@ -132,8 +134,8 @@ def admin_change_location(parcel_id):
     if not Users(user_id):
         return jsonify({"message": "This operations is only to be done by the admin"})
     data = request.get_json()
-    status = data.get('status')
-    admin_location = kd.admin_change_location(parcel_id, user_id, status)
+    parcel_location = data.get('parcel_location')
+    admin_location = kd.admin_change_location(parcel_id, user_id, parcel_location)
     return jsonify({"message": "parcel location changed successfully", "data": admin_location})
 
 

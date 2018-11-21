@@ -3,6 +3,7 @@ from api.Helpers.error_handlers import InvalidUsage
 from api.Helpers.validations import Validation
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import timedelta
+
 from api.models.auth import Users
 from werkzeug.security import check_password_hash
 
@@ -48,18 +49,22 @@ def login():
     username = data['username']
     password = data['password']
 
-    check_user = ke.fetch_user(username, password)
+    check_user = ke.get_user_by_username(username)
 
-    my_identity=dict(
-                user_id=check_user.get('user_id'),
-                user_role=check_user.get('role')
-            )
+    if not check_user:
+        return jsonify({"message": "first signup"})
+    check_pwd = ke.check_password(check_user['password'], password)
+    if check_pwd:
+        my_identity = dict(
+            user_id=check_user.get('user_id'),
+            user_role=check_user.get('role')
+        )
+        return jsonify(
+            {"access_token": create_access_token(identity=my_identity, expires_delta=timedelta(hours=3)),
+             "message": "logged in successfully"}), \
+               200
 
-    if check_user:
-        check_user = users_obj.fetch_user(username, password=password)
-        return jsonify({"access_token": create_access_token(identity=my_identity, expires_delta=timedelta
-        (hours=3)), "message": "logged in successfully"}), 200
-    return jsonify({'message': 'please enter username'})
+    return jsonify({"message": "first signup"})
 
 
 
