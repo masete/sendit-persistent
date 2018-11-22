@@ -6,22 +6,35 @@
 
 
 Send IT is a web application that helps clients to deliver their parcels in distant places according to their weigth and distance. It can be used by any one who wishes to ship their goods
-##  Endpoints
-|Endpoint|IPORTANCE|
-|:---:|:---|
 
-|Users *POST*|/api/auth/login|Login user and admin|
-|Users *POST*|/api/auth/signup|Signup user|
-|Parcels *POST*|/api/v1/parcel|create parcel order|
-|Parcels*GET* |/api/v1/parcel|Get all parcel|
-|Parcels *GET*|/api/v1/parcels/<int:parcel_id>/destination||
-|Parcel *GET* Only Admin|/api/v1/parcels/<int:parcel_id>/status||
-|Parcel *GET* Admin/user|[/api/v1/parcel||
-|Admin *PUT* Only Admin|/api/v1/parcels/<int:parcel_id>/present_location||
-|User *PUT* Only Admin|/api/v1/parcels/<int:parcel_id>/present_destination||
-|Admin *PUT* Only Admin|/api/v1/parcels/<int:parcel_id>/present_status||
-|Admin *PUT* Only Admin|/api/v1/parcels/<int:parcel_id>/present_location|Admin can chande location|
+## Features
+As an admin, am entitled to two specific routes, but i can still access some users routes without editing anything:
+- Change status of an order parcel
+- Change location of an order parcel
+- View all orders created
+- And all Normal users routes except cancel parcel and change destination
 
+As a normal user, am entitled to the following features:
+- A user can create a parcel
+- A user can view all parcels
+- A user can retrieve a single parcel
+- A user can cancel a parcel
+- A user can change the destination of a parcel
+. A user can get all parcels that he/she posted
+
+## Endpoints
+HTTP Method | End point | Action
+-----------|-----------|----------
+POST | api/auth/login | Login a user/admin
+POST | api/auth/signup | Register a user
+POST | api/v1/parcel | Create a parcel order
+GET | api/v1/parcel | Retrieve all parcel orders
+GET | api/v1/parcel/parcel_id | Retrieve a single parcel order
+GET | api/v1/user | Retrieve all registered users
+GET | api/v1/users/user_id/parcel | Retrieve order parcels by a single user
+PUT | api/v1/parcels/parcel_id/destination| User change destination
+PUT | api/v1/parcels/parcel_id/status| Admin change status
+PUT | api/v1/parcels/parcel_id/present_location| Admin Modify location
 
 ## Project Installation
 |Action|Command Neeeded|
@@ -50,7 +63,7 @@ Send IT is a web application that helps clients to deliver their parcels in dist
 
 
 ### CREDITS
-- Much appreciation goes to my fellow bootcamp candidates for your tireless efforts in helping me where I got stuck
+- Much appreciation goes to my fellow bootcamp candidates, TEAM-POWER and both my LFA's of week1 and week2 for your tireless efforts in helping me where I got stuck
 - Lastly, thank you Andela for  the `Levelup35` program.
 ## Author
 __MASETE NICHOLAS__
