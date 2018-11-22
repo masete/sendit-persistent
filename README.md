@@ -1,7 +1,7 @@
 # sendit-persistent
 
 ## Badges
-[![Build Status](https://travis-ci.org/masete/sendit-persistent.svg?branch=resolved_feedback)](https://travis-ci.org/masete/sendit-persistent) [![Maintainability](https://api.codeclimate.com/v1/badges/ad2303d54e880a08e46b/maintainability)](https://codeclimate.com/github/masete/sendit-persistent/maintainability) [![Coverage Status](https://coveralls.io/repos/github/masete/sendit-persistent/badge.svg)](https://coveralls.io/github/masete/sendit-persistent)
+[![Build Status](https://travis-ci.org/masete/sendit-persistent.svg?branch=resolved_feedback)](https://travis-ci.org/masete/sendit-persistent) [![Maintainability](https://api.codeclimate.com/v1/badges/ad2303d54e880a08e46b/maintainability)](https://codeclimate.com/github/masete/sendit-persistent/maintainability) [![Coverage Status](https://coveralls.io/repos/github/masete/sendit-persistent/badge.svg?branch=develop)](https://coveralls.io/github/masete/sendit-persistent?branch=develop)
 
 
 
