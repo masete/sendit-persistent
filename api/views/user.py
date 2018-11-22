@@ -8,7 +8,7 @@ from api.models.auth import Users
 from werkzeug.security import check_password_hash
 
 
-ke= Users()
+users= Users()
 val = Validation()
 users_obj = Users(username=None, email=None, password=None)
 
@@ -26,7 +26,7 @@ def signup():
     if val_data:
         return jsonify({"message": val_data})
 
-    signup_data = ke.signup_user(username, email, password)
+    signup_data = users.signup_user(username, email, password)
 
     if not signup_data:
         return jsonify({"message": "user already exists"})
@@ -36,7 +36,7 @@ def signup():
 @user_blueprint.route('/api/v1/user', methods=['GET'])
 @jwt_required
 def get_all_users():
-    user = ke.get_all_users()
+    user = users.get_all_users()
     return jsonify({"user": user})
 
 
@@ -49,11 +49,11 @@ def login():
     username = data['username']
     password = data['password']
 
-    check_user = ke.get_user_by_username(username)
-
+    check_user = users.get_user_by_username(username)
+    print(check_user)
     if not check_user:
         return jsonify({"message": "first signup"})
-    check_pwd = ke.check_password(check_user['password'], password)
+    check_pwd = users.check_password(check_user['password'], password)
     if check_pwd:
         my_identity = dict(
             user_id=check_user.get('user_id'),
@@ -63,7 +63,7 @@ def login():
             {"access_token": create_access_token(identity=my_identity, expires_delta=timedelta(hours=3)),
              "message": "logged in successfully"}), 200
 
-    return jsonify({"message": "first create an account please"})
+    return jsonify({"message": "wrong password or username"}), 400
 
 
 

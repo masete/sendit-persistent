@@ -2,7 +2,6 @@ import unittest
 import json
 from api.models.database import DatabaseConnection
 
-
 from run import create_app
 
 """
@@ -27,13 +26,13 @@ class TestEndpoints(unittest.TestCase):
         login = dict(username="admin", password="admin")
         request = self.app.post('/api/auth/login', json=login)
         response = json.loads(request.data.decode())
-        self.assertIn('first create an account please', response['message'])
+        self.assertIn('wrong password or username', response['message'])
 
     def test_create_user(self):
         signup = dict(username="joel", email="joel@gmail.com", password="joel1234")
         request = self.app.post('/api/auth/signup', json=signup)
         response = json.loads(request.data.decode())
-        self.assertIn('signedup user', str(response))
+        self.assertIn('user signed up successfully', response['message'])
         self.assertEqual(request.status_code, 201)
 
     def test_log_in_user_in_system(self):
@@ -56,7 +55,8 @@ class TestEndpoints(unittest.TestCase):
     def test_create_parcel(self):
         token = self.get_user_token()
 
-        parcel_order = dict(parcel_description='some important stuff', parcel_location="mbarara", parcel_destination="kitgum",
+        parcel_order = dict(parcel_description='some important stuff', parcel_location="mbarara",
+                            parcel_destination="kitgum",
                             parcel_weight=34, status="pending")
 
         request1 = self.app.post('/api/v1/parcel', json=parcel_order, headers={'Authorization': 'Bearer ' + token})
@@ -82,37 +82,38 @@ class TestEndpoints(unittest.TestCase):
         post_add2 = dict(parcel_id=1, parcel_location="mbale", parcel_destination="manafwa", parcel_weight=23,
                          parcel_description="mangoes", status="pending")
         response1 = self.app.post('/api/v1/parcel', json=post_add2,
-                                    headers={'Authorization': 'Bearer ' + token})
+                                  headers={'Authorization': 'Bearer ' + token})
         response = self.app.get('/api/v1/parcel/1', headers={'Authorization': 'Bearer ' + token})
         self.assertEqual(response.status_code, 200)
-        #assert json.loads(post_add2.data)['parcel_location'] == 'mbale'
-        #assert response.status_code == 200
-        #assert response.headers["Content-Type"] == "application/json"
+        # assert json.loads(post_add2.data)['parcel_location'] == 'mbale'
+        # assert response.status_code == 200
+        # assert response.headers["Content-Type"] == "application/json"
 
     def test_empty_parcel_location_fields(self):
-         token = self.get_user_token()
-         post_order = dict(parcel_location=" ", parcel_destination="meru", parcel_weight=48,
-                           parcel_description="apples",user_id=1,  status="pending")
-         response = self.app.post('/api/v1/parcel', json=post_order, headers={'Authorization': 'Bearer ' + token})
-         assert "error" in str(response.data)
-         assert response.status_code == 400
-         assert response.headers["Content-Type"] == "application/json"
-         assert "parcel location can not be parced empty string" in json.loads(response.data)['error']['parcel_location']
-
-    def test_empty_parcel_destination_fields(self):
         token = self.get_user_token()
-        post_order = dict(parcel_location="kisumu", parcel_destination=" ", parcel_weight=48,
-                          parcel_description="apples",user_id=1, status="pending")
+        post_order = dict(parcel_location=" ", parcel_destination="meru", parcel_weight=48,
+                          parcel_description="apples", user_id=1, status="pending")
         response = self.app.post('/api/v1/parcel', json=post_order, headers={'Authorization': 'Bearer ' + token})
         assert "error" in str(response.data)
         assert response.status_code == 400
         assert response.headers["Content-Type"] == "application/json"
-        assert "parcel destination can not be parced empty string" in json.loads(response.data)['error']['parcel_destination']
+        assert "parcel location can not be parced empty string" in json.loads(response.data)['error']['parcel_location']
+
+    def test_empty_parcel_destination_fields(self):
+        token = self.get_user_token()
+        post_order = dict(parcel_location="kisumu", parcel_destination=" ", parcel_weight=48,
+                          parcel_description="apples", user_id=1, status="pending")
+        response = self.app.post('/api/v1/parcel', json=post_order, headers={'Authorization': 'Bearer ' + token})
+        assert "error" in str(response.data)
+        assert response.status_code == 400
+        assert response.headers["Content-Type"] == "application/json"
+        assert "parcel destination can not be parced empty string" in json.loads(response.data)['error'][
+            'parcel_destination']
 
     def test_empty_parcel_weight_fields(self):
         token = self.get_user_token()
-        post_order = dict(parcel_location="kisumu", parcel_destination="mbale", parcel_weight= -1,
-                       parcel_description="apples", user_id=1, status="pending")
+        post_order = dict(parcel_location="kisumu", parcel_destination="mbale", parcel_weight=-1,
+                          parcel_description="apples", user_id=1, status="pending")
         response = self.app.post('/api/v1/parcel', json=post_order, headers={'Authorization': 'Bearer ' + token})
         assert "error" in str(response.data)
         assert response.status_code == 400
@@ -121,13 +122,14 @@ class TestEndpoints(unittest.TestCase):
 
     def test_empty_parcel_description_fields(self):
         token = self.get_user_token()
-        post_order = dict(parcel_location="kisumu", parcel_destination="mbale", parcel_weight= 78,
-                          parcel_description=" ",user_id=1, status="pending")
+        post_order = dict(parcel_location="kisumu", parcel_destination="mbale", parcel_weight=78,
+                          parcel_description=" ", user_id=1, status="pending")
         response = self.app.post('/api/v1/parcel', json=post_order, headers={'Authorization': 'Bearer ' + token})
         assert "error" in str(response.data)
         assert response.status_code == 400
         assert response.headers["Content-Type"] == "application/json"
-        assert "parcel description can not be parced empty string" in json.loads(response.data)['error']['parcel_description']
+        assert "parcel description can not be parced empty string" in json.loads(response.data)['error'][
+            'parcel_description']
 
     def test_empty_status_fields(self):
         token = self.get_user_token()
@@ -166,7 +168,6 @@ class TestEndpoints(unittest.TestCase):
         assert response.headers["Content-Type"] == "application/json"
         assert "status should be a string" == json.loads(response.data)['error']['status']
 
-
     def test_invalid_parcel_weight_field_inputs(self):
         token = self.get_user_token()
         post_order = dict(parcel_location="naalya", parcel_destination="moroto", parcel_weight="five",
@@ -193,33 +194,34 @@ class TestEndpoints(unittest.TestCase):
                            parcel_description="eggs", status="cancelled")
         response = self.app.post('/api/v1/parcel', json=post_order, headers={'Authorization': 'Bearer ' + token})
         response2 = self.app.post('/api/v1/parcel', json=post_order2, headers={'Authorization': 'Bearer ' + token})
-        response3 = self.app.get('/api/v1/parcel',  headers={'Authorization': 'Bearer ' + token})
+        response3 = self.app.get('/api/v1/parcel', headers={'Authorization': 'Bearer ' + token})
         assert response3.status_code == 200
         assert response3.headers["Content-Type"] == "application/json"
         assert "jinja" and "kisumu" in str(response3.data)
 
-    def test_get_parcel_by_id(self):
+    def test_get_parcel_by_id_url_status_codes(self):
         token = self.get_user_token()
-        response = self.app.post('/api/v1/parcel',headers={'Authorization': 'Bearer ' + token})
-        response1 = self.app.get('/api/v1/parcel/1' ,headers={'Authorization': 'Bearer ' + token})
-        response2 = self.app.get('api/v1/parcel/w',headers={'Authorization': 'Bearer ' + token})
-        assert response1.status_code == 200
-        assert response2.status_code == 404
+        # response = self.app.post('/api/v1/parcel',headers={'Authorization': 'Bearer ' + token})
+        response1 = self.app.get('/api/v1/parcel/1', headers={'Authorization': 'Bearer ' + token})
+        response2 = self.app.get('api/v1/parcel/w', headers={'Authorization': 'Bearer ' + token})
+        data1 = json.loads(response1.data)
         assert response1.headers["Content-Type"] == "application/json"
+        assert response1.status_code == 404
+        assert data1['message'] == "parcel does not exist"
+        assert response2.status_code == 404
 
-    def test_parcel_by_user_id(self):
+    def test_parcel_by_user_id_url_status_codes(self):
         token = self.get_user_token()
         response1 = self.app.get('/api/v1/users/1/parcel', headers={'Authorization': 'Bearer ' + token})
         response2 = self.app.get('/api/v1/users/w/parcel', headers={'Authorization': 'Bearer ' + token})
-        assert response1.status_code == 200
-        assert response2.status_code == 404
+        data1 = json.loads(response1.data)
         assert response1.headers["Content-Type"] == "application/json"
+        assert response1.status_code == 404
+        assert data1['message'] == "No parcels were found for that user"
+        assert response2.status_code == 404
 
     def test_cancel_parcel(self):
         token = self.get_user_token()
-        response = self.app.post('/api/v1/parcel',headers={'Authorization': 'Bearer ' + token})
+        response = self.app.post('/api/v1/parcel', headers={'Authorization': 'Bearer ' + token})
         response2 = self.app.get('/api/v1/parcel/h/cancel', headers={'Authorization': 'Bearer ' + token})
         assert response2.status_code == 404
-
-
-
