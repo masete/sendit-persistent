@@ -34,7 +34,7 @@ class Parcel:
         results = self.cursor.fetchall()
         return results
 
-    def get_one_parcel(self, parcel_id):
+    def get_parcel_by_parcel_id(self, parcel_id):
         get_single_parcel = "SELECT * FROM parcel WHERE parcel_id = {}".format(parcel_id)
         self.cursor.execute(get_single_parcel)
         result = self.cursor.fetchone()

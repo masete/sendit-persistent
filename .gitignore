@@ -19,4 +19,5 @@
 /tests/__pycache__/test_controllers.cpython-36-PYTEST.pyc
 /tests/Helpers/__pycache__/validations.cpython-36.pyc
 /tests/Helpers/__pycache__/__init__.cpython-36.pyc
+.coverage
 

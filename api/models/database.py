@@ -30,35 +30,30 @@ class DatabaseConnection:
                 )
             """
         )
-
-        self.attributes = dict(dbname='senditdb',
-                               user='postgres',
-                               password='qwerty',
-                               host='localhost',
-                               port='5432')
-        """
-
-        if os.getenv("FLASK_ENV") == "production":
-            self.connection = psycopg2.connect(os.getenv("DATABASE_URL"))
-
-        elif os.getenv("FLASK_ENV") == "TESTING":
-            print('Connecting to test db')
-            self.connection = psycopg2.connect(dbname='test_senditdb',
-                                               user='postgres',
-                                               password='qwerty',
-                                               host='localhost',
-                                               port='5432')
-        else:
-            print('Connecting development db')
-            self.connection = psycopg2.connect(dbname='senditdb',
-                                               user='postgres',
-                                               password='qwerty',
-                                               host='localhost',
-                                               port='5432')
-        """
-
         try:
-            self.connection = psycopg2.connect(**self.attributes, cursor_factory=RealDictCursor)
+            # self.attributes = dict(dbname='senditdb',
+            #                        user='postgres',
+            #                        password='qwerty',
+            #                        host='localhost',
+            #                        port='5432')
+            # self.connection = psycopg2.connect(**self.attributes, cursor_factory=RealDictCursor)
+            if os.getenv("FLASK_ENV") == "production":
+                self.connection = psycopg2.connect(os.getenv("DATABASE_URL"), cursor_factory=RealDictCursor)
+
+            elif os.getenv("FLASK_ENV") == "TESTING":
+                print('Connecting to test db')
+                self.connection = psycopg2.connect(dbname='test_senditdb',
+                                                   user='postgres',
+                                                   password='qwerty',
+                                                   host='localhost',
+                                                   port='5432', cursor_factory=RealDictCursor)
+            else:
+                print('Connecting development db')
+                self.connection = psycopg2.connect(dbname='senditdb',
+                                                   user='postgres',
+                                                   password='qwerty',
+                                                   host='localhost',
+                                                   port='5432', cursor_factory=RealDictCursor)
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
 
