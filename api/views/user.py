@@ -18,9 +18,12 @@ user_blueprint = Blueprint("user", __name__)
 @user_blueprint.route('/api/auth/signup', methods=['POST'], strict_slashes=False)
 def signup():
     data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
+    try:
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+    except:
+        return jsonify({"message": "bad request"}), 400
 
     val_data = val.val_user_signup(username, email, password)
     if val_data:
@@ -45,9 +48,13 @@ def login():
 
     if request.content_type != "application/json":
         raise InvalidUsage("Invalid content type", 400)
-    data = request.get_json()
-    username = data['username']
-    password = data['password']
+
+    try:
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
+    except:
+        return jsonify({"message": "bad request"}), 400
 
     check_user = users.get_user_by_username(username)
     print(check_user)

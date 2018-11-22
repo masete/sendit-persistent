@@ -21,13 +21,15 @@ def create_parcel():
 
     if request.content_type != "application/json":
         raise InvalidUsage("Invalid content type", 400)
-
     data = request.get_json()
-    parcel_location = data.get('parcel_location')
-    parcel_destination = data.get('parcel_destination')
-    parcel_weight = data.get('parcel_weight')
-    parcel_description = data.get('parcel_description')
-    status = data.get('status')
+    try:
+        parcel_location = data.get('parcel_location')
+        parcel_destination = data.get('parcel_destination')
+        parcel_weight = data.get('parcel_weight')
+        parcel_description = data.get('parcel_description')
+        status = data.get('status')
+    except:
+        return jsonify({"message": "bad request"})
 
     val_data = val.empty_order_fields(parcel_location, parcel_destination, parcel_weight, parcel_description, status)
     if val_data:
@@ -76,8 +78,8 @@ def get_single_parcel(parcel_id):
 def cancel_parcel(parcel_id):
     user_id = get_jwt_identity()
 
-    # if user_id['user_role']:
-    #     return jsonify({"message": "your not authorised"}), 401
+    if not user_id['user_role']:
+        return jsonify({"message": "your not authorised"}), 401
     get_parcel = parcel.get_parcel(parcel_id)
     if not get_parcel:
         return jsonify({"message": "parcel does not exist"}), 400
@@ -96,10 +98,9 @@ def cancel_parcel(parcel_id):
 @jwt_required
 def get_parcel_by_user_id(user_id):
     loggedin_user_id = get_jwt_identity()
-    print(loggedin_user_id)
 
-    # if not loggedin_user_id['user_role']:
-    #     return jsonify({"message": "your not authorised"}), 401
+    #if not loggedin_user_id['user_role']:
+         #return jsonify({"message": "your not authorised"}), 401
 
     result = parcel.find_parcel_by_user_id(user_id)
     if result:
@@ -119,8 +120,8 @@ def change_destination(parcel_id):
         return jsonify(
             {"message": "Parcel destination cant be changed because the parcel is '{}'".format(parcel1['status'])}), 400
 
-    # if not user_id['user_role']:
-    #     return jsonify({"message": "your not authorised"}), 401
+    if not user_id['user_role']:
+        return jsonify({"message": "your not authorised"}), 401
 
     data = request.get_json()
     parcel_destination = data.get('parcel_destination')
@@ -133,7 +134,7 @@ def change_destination(parcel_id):
 def admin_change_status(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users(user_id):
+    if Users(user_id):
         return jsonify({"message": "This operations is only to be done by the admin"})
 
     data = request.get_json()
@@ -147,7 +148,7 @@ def admin_change_status(parcel_id):
 def admin_change_location(parcel_id):
     user_id = get_jwt_identity()
 
-    if not Users(user_id):
+    if Users(user_id):
         return jsonify({"message": "This operations is only to be done by the admin"})
 
     data = request.get_json()
