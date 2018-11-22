@@ -8,14 +8,12 @@ from flask_jwt_extended import (jwt_required, get_jwt_identity)
 parcel = Parcel()
 val = Validation()
 
-
 parcel_blueprint = Blueprint("parcel", __name__)
 
 
 @parcel_blueprint.route('/api/v1/parcel', methods=['POST'], strict_slashes=False)
 @jwt_required
 def create_parcel():
-
     user_id = get_jwt_identity()
 
     if user_id['user_role']:
@@ -42,7 +40,8 @@ def create_parcel():
     if empty_strings:
         raise InvalidUsage(empty_strings, 400)
 
-    parcel.insert_new_parcel(user_id, parcel_location, parcel_destination, parcel_weight, parcel_description, status)
+    parcel.insert_new_parcel(user_id['user_id'], parcel_location, parcel_destination, parcel_weight, parcel_description,
+                             status)
     return jsonify({'message': "parcel with description {} has been added".format(parcel_description)}), 201
 
 
@@ -77,12 +76,19 @@ def get_single_parcel(parcel_id):
 def cancel_parcel(parcel_id):
     user_id = get_jwt_identity()
 
-    if user_id['user_role']:
-        return jsonify({"message": "your not authorised"}), 401
+    # if user_id['user_role']:
+    #     return jsonify({"message": "your not authorised"}), 401
+    get_parcel = parcel.get_parcel(parcel_id)
+    if not get_parcel:
+        return jsonify({"message": "parcel does not exist"}), 400
+
+    if user_id['user_id'] != get_parcel['user_id']:
+        return jsonify({"message": "sorry your not allowed to edit this order"}), 401
+
 
     result = parcel.cancel_parcel(parcel_id)
     if not result:
-        return jsonify({"message": "parcel does not exist"}), 404
+        return jsonify({"message": "We were unable to cancel the order. Please try again"}), 500
     return jsonify({"message": result})
 
 
@@ -92,10 +98,10 @@ def get_parcel_by_user_id(user_id):
     loggedin_user_id = get_jwt_identity()
     print(loggedin_user_id)
 
-    if user_id['user_role']:
+    if not loggedin_user_id['user_role']:
         return jsonify({"message": "your not authorised"}), 401
     result = parcel.find_parcel_by_user_id(user_id)
-    print(user_id)
+    print("sent user id", user_id)
     if result:
         return jsonify({"message": result})
 
@@ -147,5 +153,3 @@ def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
-
-

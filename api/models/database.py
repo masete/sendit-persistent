@@ -62,7 +62,6 @@ class DatabaseConnection:
             self.connection.autocommit = True
             self.cursor = self.connection.cursor()
 
-
             for command in self.commands:
                 self.cursor.execute(command)
         except Exception as error:
