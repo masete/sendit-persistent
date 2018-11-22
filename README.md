@@ -59,7 +59,9 @@ PUT | api/v1/parcels/parcel_id/present_location| Admin Modify location
 ### Running the app
 
 `$ python3 run.py`
-
+### Heroku Link
+https://sendit-masete.herokuapp.com/   
+Enjoy your ride through my application
 
 
 ### CREDITS
