@@ -1,9 +1,10 @@
+"""authentiation views file wtith login and signup"""
 from flask import Blueprint, jsonify, request
 from api.Helpers.error_handlers import InvalidUsage
 from api.Helpers.validations import Validation
 from flask_jwt_extended import create_access_token, jwt_required
 from datetime import timedelta
-
+from flasgger import swag_from
 from api.models.auth import Users
 from werkzeug.security import check_password_hash
 
@@ -15,10 +16,15 @@ users_obj = Users(username=None, email=None, password=None)
 user_blueprint = Blueprint("user", __name__)
 
 
+@swag_from('../docs/signup.yml')
 @user_blueprint.route('/api/auth/signup', methods=['POST'], strict_slashes=False)
 def signup():
-    data = request.get_json()
+    """
+    authentication route user signup
+    :return:
+    """
     try:
+        data = request.get_json()
         username = data.get('username')
         email = data.get('email')
         password = data.get('password')
@@ -36,15 +42,25 @@ def signup():
     return jsonify({"message": "user signed up successfully"}), 201
 
 
+@swag_from('../docs/get_users.yml')
 @user_blueprint.route('/api/v1/user', methods=['GET'])
 @jwt_required
 def get_all_users():
+    """
+    endpoint to get all users
+    :return:
+    """
     user = users.get_all_users()
     return jsonify({"user": user})
 
 
+@swag_from('../docs/login.yml')
 @user_blueprint.route('/api/auth/login', methods=['POST'], strict_slashes=False)
 def login():
+    """
+    authentication route for users to signup
+    :return:
+    """
 
     if request.content_type != "application/json":
         raise InvalidUsage("Invalid content type", 400)
