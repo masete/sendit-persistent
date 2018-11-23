@@ -70,5 +70,5 @@ Enjoy your ride through my application
 ## Author
 __MASETE NICHOLAS__
 ## Contact
-[Twitter](https://twitter.com/masete)
+[Twitter](https://twitter.com/seapirate1)
 
