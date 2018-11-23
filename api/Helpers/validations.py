@@ -1,7 +1,9 @@
+"""My validations class being called in views"""
 import re
 
 
 class Validation:
+    """All validations handled are here"""
     def val_user_signup(self, username, email, password):
         if not username or username == " ":
             return "Fill field cannot be empty"
@@ -58,3 +60,9 @@ class Validation:
         if parcel_weight < 0:
             error['parcel_weight'] = 'weight cant be less than 0'
         return error
+
+    def validate_name(self, username):
+        username_regex = re.compile("^[A-Za-z\s]{4,30}$")
+        if not username_regex.match(username):
+            return "enter correct credentials"
+        return None

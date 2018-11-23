@@ -85,9 +85,7 @@ class TestEndpoints(unittest.TestCase):
                                   headers={'Authorization': 'Bearer ' + token})
         response = self.app.get('/api/v1/parcel/1', headers={'Authorization': 'Bearer ' + token})
         self.assertEqual(response.status_code, 200)
-        # assert json.loads(post_add2.data)['parcel_location'] == 'mbale'
-        # assert response.status_code == 200
-        # assert response.headers["Content-Type"] == "application/json"
+
 
     def test_empty_parcel_location_fields(self):
         token = self.get_user_token()
@@ -224,4 +222,18 @@ class TestEndpoints(unittest.TestCase):
         token = self.get_user_token()
         response = self.app.post('/api/v1/parcel', headers={'Authorization': 'Bearer ' + token})
         response2 = self.app.get('/api/v1/parcel/h/cancel', headers={'Authorization': 'Bearer ' + token})
+        assert response2.status_code == 404
+
+    def test_user_destination(self):
+        token = self.get_user_token()
+        response1 = self.app.put('/api/v1/parcels/1/destination',  headers={'Authorization': 'Bearer ' + token})
+        response2 = self.app.put('/api/v1/parcels/w/destination', headers={'Authorization': 'Bearer ' + token})
+        #assert response1.status_code == 401
+        assert response2.status_code == 404
+
+    def test_admin_change_status(self):
+        token = self.get_admin_token()
+        response1 = self.app.put('/api/v1/parcels/1/status', headers={'Authorization': 'Bearer ' + token})
+        response2 = self.app.put('/api/v1/parcels/w/status', headers={'Authorization': 'Bearer ' + token})
+        assert response1.status_code == 200
         assert response2.status_code == 404

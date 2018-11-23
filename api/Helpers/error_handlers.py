@@ -1,3 +1,6 @@
+"""Helpers execption class, to handle error responses"""
+
+
 class InvalidUsage(Exception):
     status_code = 400
 
@@ -9,6 +12,7 @@ class InvalidUsage(Exception):
         self.payload = payload
 
     def to_dict(self):
+        """to show the dict format for the error responses"""
         rv = dict(self.payload or ())
         rv['error'] = self.message
         return rv

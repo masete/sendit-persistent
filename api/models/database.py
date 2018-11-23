@@ -1,3 +1,4 @@
+"""my database file, creating tables and a database connection"""
 import psycopg2
 import os
 from psycopg2.extras import RealDictCursor
@@ -5,6 +6,9 @@ from werkzeug.security import generate_password_hash
 
 
 class DatabaseConnection:
+    """
+    Initializing my database
+    """
     def __init__(self):
         self.commands = (
             """
@@ -73,6 +77,9 @@ class DatabaseConnection:
         self.cursor.execute(sql)
         self.connection.commit()
 
+    """
+    method to drop tables being used in my tests
+    """
     def drop_tables(self):
         query = "DROP TABLE IF EXISTS {} CASCADE"
         tabl_names = ["parcel, users"]
