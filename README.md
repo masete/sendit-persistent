@@ -1,6 +1,7 @@
 # sendit-persistent
 
 ## Badges
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/663543f3cabd42419060b9ee83ab8cd9)](https://app.codacy.com/app/masete/sendit-persistent?utm_source=github.com&utm_medium=referral&utm_content=masete/sendit-persistent&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/masete/sendit-persistent.svg?branch=resolved_feedback)](https://travis-ci.org/masete/sendit-persistent) [![Maintainability](https://api.codeclimate.com/v1/badges/ad2303d54e880a08e46b/maintainability)](https://codeclimate.com/github/masete/sendit-persistent/maintainability) [![Coverage Status](https://coveralls.io/repos/github/masete/sendit-persistent/badge.svg?branch=develop)](https://coveralls.io/github/masete/sendit-persistent?branch=develop) 
 
 
